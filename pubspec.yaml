@@ -1,8 +1,8 @@
 name: wpp_au
 description: wpp_au package
-version: 0.0.1
-homepage: https://example.com
-repository: https://example.com
+version: 0.0.2
+homepage: https://github.com
+repository: https://github.com
 
 environment:
   sdk: ">=2.12.0 <4.0.0"
@@ -18,8 +18,33 @@ dependencies:
   http: ^0.13.5
   intl: ^0.18.0
   platform_device_id: ^1.0.1
+  url_launcher: ^6.2.2
+  flutter_custom_tabs: ^1.2.1
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: jost
+      fonts:
+        - asset: assets/fonts/jost/Jost-Black.ttf
+        - asset: assets/fonts/jost/Jost-Bold.ttf
+        - asset: assets/fonts/jost/Jost-ExtraBold.ttf
+        - asset: assets/fonts/jost/Jost-ExtraLight.ttf
+        - asset: assets/fonts/jost/Jost-Light.ttf
+        - asset: assets/fonts/jost/Jost-Medium.ttf
+        - asset: assets/fonts/jost/Jost-Regular.ttf
+        - asset: assets/fonts/jost/Jost-SemiBold.ttf
+        - asset: assets/fonts/jost/Jost-Thin.ttf
+    - family: sofia
+      fonts:
+        - asset: assets/fonts/sofia/Sofia-Regular.ttf
+    - family: oleo
+      fonts:
+        - asset: assets/fonts/oleo/OleoScript-Bold.ttf
+        - asset: assets/fonts/oleo/OleoScript-Regular.ttf

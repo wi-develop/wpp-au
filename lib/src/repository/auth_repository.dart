@@ -94,6 +94,42 @@ class AuthRepository {
     }
   }
 
+  Future<bool?> mailC({
+    required ClientAppKeys clientAppKeys,
+    required String mail,
+    required String baseUrl,
+  }) async {
+    try {
+      String deviceid = await _utils.getDeviceId;
+      String token = _tokenService.login(
+        clientAppKeys: clientAppKeys,
+        loginMail: mail,
+      );
+
+      var res = await _api.post(
+        baseUrl: baseUrl,
+        url: "/a2/mailC",
+        token: token,
+        body: {
+          "deviceid": deviceid,
+        },
+      );
+
+      if (res.status == ResponseStatus.success) {
+        var c1 = res.jsonBody!["ctrl"];
+        if (c1 == true) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<ResponseModel<WpTokenModel?>> signup({
     required ClientAppKeys clientAppKeys,
     required String signupMail,

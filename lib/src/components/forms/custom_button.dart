@@ -22,7 +22,7 @@ class CustomButton extends StatelessWidget {
     Key? key,
     required this.text,
     required this.onPressed,
-    this.borderRadius = 10,
+    this.borderRadius = 5,
     this.buttonColor = Colors.blue,
     this.controller,
     this.height = 43,

@@ -30,6 +30,17 @@ class Lang {
 
   Map<LangEnum, Map<String, String>> _tMaps = {
     LangEnum.en: {
+      "createWp": "Create a Wipepp Account",
+      "min5": "The password must be at least 6 characters long.",
+      "invalidPass":
+          "Invalid password. Please try again or click 'Forgot Password' to reset your password.",
+      "wppAu1":
+          "Use your Wippe account. If you don't have an account, a new one will be created.",
+      "wppAu2": "First, enter your email address.",
+      "wppAu3": "More information.",
+      "next": "Next",
+      "showPass": "Show password.",
+      "notEmptyText": "Required field. Please fill in.",
       "login": "Login",
       "email": "Enter your email",
       "pass": "Enter your password",
@@ -44,8 +55,6 @@ class Lang {
       "year_data": "Enter your date of birth",
       "back": "Back",
       "forget_enter_mail": "Type your email address in the field below.",
-      "forget_w1":
-          "If you do not have a Wipepp account you have created before, create a new account.",
       "forget_b1": "Send Password Reset Request",
       "fill": "Fill in the required fields.",
       "not_c": "Email and/or password are not correct. Please check accuracy.",

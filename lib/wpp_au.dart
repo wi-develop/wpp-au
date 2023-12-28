@@ -1,6 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
-library wipepp_auth;
+library wpp_au;
 
 import 'dart:developer';
 

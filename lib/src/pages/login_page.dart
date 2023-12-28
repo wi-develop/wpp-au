@@ -1,10 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../../wipepp_auth.dart';
+import '../../wpp_au.dart';
 import '../components/dialogs/custom_dialog.dart';
 import '../components/dialogs/date_picker_dialog.dart';
 import '../components/forms/custom_button.dart';
@@ -25,24 +26,21 @@ Future<WpTokenModel?> loginPage({
   bool _isHiddenPass = true;
 
   LangEnum _langEnum = LangEnum.en;
-  LoginType _loginType = LoginType.login;
+  LoginType _loginType = LoginType.enterMail;
 
-  final _loginMail = TextEditingController();
-  final _loginPass = TextEditingController();
+  final _mail = TextEditingController();
+  final _pass = TextEditingController();
+  final _name = TextEditingController();
+  DateTime? _year;
 
-  final _signupName = TextEditingController();
-  DateTime? _signupYear;
-  final _signupMail = TextEditingController();
-  final _signupPass = TextEditingController();
-  final _signupRePass = TextEditingController();
-
-  final _forgetMail = TextEditingController();
+  String? _mailErrorText;
+  String? _passErrorText;
+  String? _newPassErrorText;
+  String? _nameErrorText;
+  String? _yearErrorText;
 
   final _btnCtrl = RoundedLoadingButtonController();
-
-  String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
   String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
-  String signup = _lang.getTextTR(langEnum: _langEnum, key: "signup");
 
   void changeLoginType(LoginType loginType, setState) {
     if (context.mounted) {
@@ -52,31 +50,43 @@ Future<WpTokenModel?> loginPage({
     }
   }
 
-  Future<bool> _loginFunc() async {
+  Future<bool?> _mailCFunc() async {
+    try {
+      var value = await _authRepository.mailC(
+        baseUrl: clientAppKeys.baseUrl,
+        clientAppKeys: clientAppKeys,
+        mail: _mail.text.trim(),
+      );
+      return value;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<WpTokenModel?> _loginFunc() async {
     String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
-    String notC = _lang.getTextTR(langEnum: _langEnum, key: "not_c");
+    String invalidPass =
+        _lang.getTextTR(langEnum: _langEnum, key: "invalidPass");
 
     try {
-      if (_loginMail.text.trim().length > 4 &&
-          _loginPass.text.trim().length > 3) {
+      if (_mail.text.trim().length > 4 && _pass.text.trim().length > 3) {
         var value = await _authRepository.login(
           baseUrl: clientAppKeys.baseUrl,
           clientAppKeys: clientAppKeys,
-          loginMail: _loginMail.text.trim(),
-          loginPass: _loginPass.text,
+          loginMail: _mail.text.trim(),
+          loginPass: _pass.text,
         );
         if (value.data != null) {
-          Navigator.pop(context, value.data);
-          return true;
+          return value.data;
         } else {
           _btnCtrl.reset();
           if (context.mounted) {
             customDialog(
               context,
-              text: notC,
+              text: invalidPass,
             );
           }
-          return false;
+          return null;
         }
       } else {
         _btnCtrl.reset();
@@ -86,75 +96,58 @@ Future<WpTokenModel?> loginPage({
             text: fill,
           );
         }
-        return false;
+        return null;
       }
     } catch (e) {
       customDialog(
         context,
         text: "OPPS! Try again.",
       );
-      return false;
+      return null;
     }
   }
 
-  Future<bool> _signupFunc(dynamic setState) async {
+  Future<WpTokenModel?> _signupFunc(dynamic setState) async {
     String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
-    String passReW = _lang.getTextTR(langEnum: _langEnum, key: "pass_re_w");
     String usertrue = _lang.getTextTR(langEnum: _langEnum, key: "usertrue");
 
     try {
-      if (_signupMail.text.trim().length > 4 &&
-          _signupPass.text.trim().length > 3 &&
-          _signupRePass.text.trim().length > 3 &&
-          _signupName.text.trim().length > 0 &&
-          _signupYear != null) {
-        if (_signupPass.text == _signupRePass.text) {
-          var value = await _authRepository.signup(
-            clientAppKeys: clientAppKeys,
-            baseUrl: clientAppKeys.baseUrl,
-            signupMail: _signupMail.text.trim(),
-            signupPass: _signupPass.text,
-            signupName: _signupName.text.trim(),
-            signupYear: _signupYear!,
-          );
-          if (value.data != null) {
-            Navigator.pop(context, value.data);
-            return true;
-          } else {
-            _btnCtrl.reset();
-            if (context.mounted) {
-              if (value.errorMsg.toString() ==
-                  '{"statusCode":451,"msg":"E_113","errorMessage":"error: duplicate key value violates unique constraint \\"users_mail_key\\"","key":null}'
-                      .toString()) {
-                setState(() {
-                  _loginMail.text = _signupMail.text;
-                });
-                changeLoginType(
-                  LoginType.login,
-                  setState,
-                );
-                customDialog(
-                  context,
-                  text: usertrue,
-                );
-              } else {
-                customDialog(
-                  context,
-                  text: "Try Again.",
-                );
-              }
-            }
-            return false;
-          }
+      if (_mail.text.trim().length > 4 &&
+          _pass.text.trim().length > 3 &&
+          _name.text.trim().length > 0 &&
+          _year != null) {
+        var value = await _authRepository.signup(
+          clientAppKeys: clientAppKeys,
+          baseUrl: clientAppKeys.baseUrl,
+          signupMail: _mail.text.trim(),
+          signupPass: _pass.text,
+          signupName: _name.text.trim(),
+          signupYear: _year!,
+        );
+        if (value.data != null) {
+          return value.data;
         } else {
           _btnCtrl.reset();
           if (context.mounted) {
-            customDialog(
-              context,
-              text: passReW,
-            );
+            if (value.errorMsg.toString() ==
+                '{"statusCode":451,"msg":"E_113","errorMessage":"error: duplicate key value violates unique constraint \\"users_mail_key\\"","key":null}'
+                    .toString()) {
+              changeLoginType(
+                LoginType.loginEnterPass,
+                setState,
+              );
+              customDialog(
+                context,
+                text: usertrue,
+              );
+            } else {
+              customDialog(
+                context,
+                text: "Try Again.",
+              );
+            }
           }
-          return false;
+          return null;
         }
       } else {
         if (context.mounted) {
@@ -164,7 +157,7 @@ Future<WpTokenModel?> loginPage({
           );
           _btnCtrl.reset();
         }
-        return false;
+        return null;
       }
     } catch (e) {
       _btnCtrl.reset();
@@ -172,25 +165,25 @@ Future<WpTokenModel?> loginPage({
         context,
         text: "OPPS! Try again.",
       );
-      return false;
+      return null;
     }
   }
 
-  Future<void> _forgetFunc() async {
+  Future<void> _forgetFunc(setState) async {
     String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
     String forgetSuccess =
         _lang.getTextTR(langEnum: _langEnum, key: "forget_p_success");
 
     try {
-      if (_forgetMail.text.trim().length > 4) {
+      if (_mail.text.trim().length > 4) {
         var value = await _authRepository.forgetPass(
           baseUrl: clientAppKeys.baseUrl,
           clientAppKeys: clientAppKeys,
-          mail: _forgetMail.text.trim(),
+          mail: _mail.text.trim(),
         );
         if (value.data) {
           _btnCtrl.reset();
-          _forgetMail.clear();
+          changeLoginType(LoginType.loginEnterPass, setState);
           customDialog(
             context,
             text: forgetSuccess,
@@ -221,68 +214,192 @@ Future<WpTokenModel?> loginPage({
     }
   }
 
-  Widget _loginWidgets(setState) {
+  Future<void> _selectYear(setState, year_warn) async {
+    var ge = await showDatePickerDialog(context);
+    if (ge != null) {
+      // ignore: division_optimization
+      if ((((DateTime.now().difference(ge)).inDays) / 365).toInt() < 13) {
+        customDialog(
+          context,
+          text: year_warn,
+        );
+      } else {
+        setState(() {
+          _year = ge;
+          _yearErrorText = null;
+        });
+      }
+    }
+  }
+
+  Widget _mailEnterWidget(setState) {
+    // String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
+    String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
+    String next = _lang.getTextTR(langEnum: _langEnum, key: "next");
+    String enterMail = _lang.getTextTR(langEnum: _langEnum, key: "email");
+
+    String wppAu1 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu1");
+    String wppAu2 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu2");
+    String wppAu3 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu3");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+            style: TextStyle(fontSize: 18.0, height: 1.56, fontFamily: "jost"),
+            children: [
+              TextSpan(
+                text: wppAu1 + " ",
+                style: TextStyle(
+                  color: _utils.appColor.titleColor,
+                  fontSize: 16.5,
+                  fontFamily: "jost",
+                ),
+              ),
+              TextSpan(
+                text: wppAu2 + " ",
+                style: TextStyle(
+                  color: _utils.appColor.titleColor,
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "jost",
+                ),
+              ),
+              TextSpan(
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    _utils.goUrl(
+                      context,
+                      "https://www.wipepp.com/p/en/wipepp-auth",
+                    );
+                  },
+                text: wppAu3,
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 16.5,
+                  fontFamily: "jost",
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 35,
+          child: Container(),
+        ),
+        AutofillGroup(
+          child: textFormField(
+            context,
+            controller: _mail,
+            autofocus: true,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: [AutofillHints.email],
+            hintText: "$email...",
+            labelText: "$email",
+            errorText: _mailErrorText ?? "",
+          ),
+        ),
+        SizedBox(height: 10),
+        CustomButton(
+          controller: _btnCtrl,
+          text: _utils.stringOneUpper(next),
+          onPressed: () async {
+            if (_mail.text.trim().length < 4) {
+              setState(() {
+                _mailErrorText = enterMail;
+              });
+              _btnCtrl.reset();
+            } else if (_utils.isValidEmail(_mail.text.trim()) == false) {
+              setState(() {
+                _mailErrorText = email;
+              });
+              _btnCtrl.reset();
+            } else {
+              bool? status = await _mailCFunc();
+              if (status == null) {
+                _btnCtrl.reset();
+              } else if (status == false) {
+                _btnCtrl.reset();
+                changeLoginType(LoginType.newUser, setState);
+                setState(() {
+                  _mailErrorText = null;
+                });
+              } else {
+                _btnCtrl.reset();
+                changeLoginType(LoginType.loginEnterPass, setState);
+                setState(() {
+                  _mailErrorText = null;
+                });
+              }
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _loginEnterPassWidget(setState) {
     String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
     String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
     String pass = _lang.getTextTR(langEnum: _langEnum, key: "pass");
-    String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
-    String login_have = _lang.getTextTR(langEnum: _langEnum, key: "login_have");
+    String showPass = _lang.getTextTR(langEnum: _langEnum, key: "showPass");
+    String notEmptyText =
+        _lang.getTextTR(langEnum: _langEnum, key: "notEmptyText");
 
     return AutofillGroup(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Text(
+            pass,
+            style: TextStyle(fontSize: 17.0),
+          ),
+          SizedBox(height: 25),
           textFormField(
             context,
-            controller: _loginMail,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
+            controller: _mail,
+            enabled: false,
             hintText: "$email...",
             labelText: "$email",
             autofillHints: [AutofillHints.email],
           ),
-          SizedBox(height: 21),
-          Row(
-            children: [
-              Expanded(
-                child: textFormField(
-                  context,
-                  controller: _loginPass,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.done,
-                  hintText: "$pass...",
-                  labelText: "$pass",
-                  autofillHints: [AutofillHints.password],
-                  isHiddenPass: _isHiddenPass,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  _isHiddenPass ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isHiddenPass = !_isHiddenPass;
-                  });
-                },
-              ),
-            ],
+          SizedBox(height: 25),
+          textFormField(
+            context,
+            controller: _pass,
+            autofocus: true,
+            keyboardType: TextInputType.visiblePassword,
+            textInputAction: TextInputAction.done,
+            hintText: "$pass...",
+            labelText: "$pass",
+            autofillHints: [AutofillHints.password],
+            isHiddenPass: _isHiddenPass,
+            errorText: _passErrorText,
           ),
           SizedBox(height: 20),
-          InkWell(
+          GestureDetector(
             onTap: () {
-              changeLoginType(LoginType.forget, setState);
+              setState(() {
+                _isHiddenPass = _isHiddenPass ? false : true;
+              });
             },
-            child: Text(
-              forget,
-              style: TextStyle(
-                fontSize: 17.0,
-                color: Colors.indigo,
-                fontWeight: FontWeight.w400,
-                decoration: TextDecoration.underline,
-                decorationColor: Colors.indigo,
-                decorationThickness: 0.6,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  _isHiddenPass
+                      ? Icons.check_box_outline_blank
+                      : Icons.check_box,
+                  size: 24,
+                ),
+                SizedBox(width: 6.0),
+                Text(
+                  Utils().stringOneUpper(showPass),
+                  style: TextStyle(fontSize: 16.8),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 25),
@@ -290,25 +407,29 @@ Future<WpTokenModel?> loginPage({
             controller: _btnCtrl,
             text: _utils.stringOneUpper(login),
             onPressed: () async {
-              bool status = await _loginFunc();
-              if (status) {
-                TextInput.finishAutofillContext();
+              if (_pass.text.trim().length < 3) {
+                _btnCtrl.reset();
+                setState(() {
+                  _passErrorText = notEmptyText;
+                });
+              } else {
+                WpTokenModel? value = await _loginFunc();
+                if (value != null) {
+                  TextInput.finishAutofillContext();
+                  Navigator.pop(context, value);
+                }
               }
             },
           ),
           SizedBox(height: 25),
-          InkWell(
-            onTap: () {
-              changeLoginType(LoginType.signup, setState);
+          TextButton(
+            onPressed: () {
+              changeLoginType(LoginType.forgetPass, setState);
             },
-            child: Center(
-              child: Text(
-                Utils().stringOneUpper(login_have),
-                style: TextStyle(
-                  fontSize: 17.0,
-                  color: Colors.green.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
+            child: Text(
+              Utils().stringOneUpper(forget),
+              style: TextStyle(
+                fontSize: 17.0,
               ),
             ),
           ),
@@ -317,36 +438,33 @@ Future<WpTokenModel?> loginPage({
     );
   }
 
-  Widget _signupWidgets(setState) {
+  Widget _newUserWidget(setState) {
     String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
     String signup = _lang.getTextTR(langEnum: _langEnum, key: "signup");
     String new_pass = _lang.getTextTR(langEnum: _langEnum, key: "new_pass");
-    String re_new_pass =
-        _lang.getTextTR(langEnum: _langEnum, key: "re_new_pass");
-    String signup_have =
-        _lang.getTextTR(langEnum: _langEnum, key: "signup_have");
     String name = _lang.getTextTR(langEnum: _langEnum, key: "name");
     String year_data = _lang.getTextTR(langEnum: _langEnum, key: "year_data");
     String year = _lang.getTextTR(langEnum: _langEnum, key: "year");
     String year_warn = _lang.getTextTR(langEnum: _langEnum, key: "year_warn");
+    String min5 = _lang.getTextTR(langEnum: _langEnum, key: "min5");
+    String createWp = _lang.getTextTR(langEnum: _langEnum, key: "createWp");
 
     return AutofillGroup(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          textFormField(
-            context,
-            controller: _signupName,
-            keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.next,
-            hintText: "$name...",
-            labelText: "$name",
-            autofillHints: [AutofillHints.name],
+          Text(
+            _utils.stringOneUpper(createWp),
+            style: TextStyle(
+              fontSize: 17.0,
+              color: _utils.appColor.titleColor,
+            ),
           ),
-          SizedBox(height: 21),
+          SizedBox(height: 25),
           textFormField(
             context,
-            controller: _signupMail,
+            controller: _mail,
+            enabled: false,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             hintText: "$email...",
@@ -354,177 +472,192 @@ Future<WpTokenModel?> loginPage({
             autofillHints: [AutofillHints.email],
           ),
           SizedBox(height: 21),
-          Row(
-            children: [
-              Expanded(
-                child: textFormField(
-                  context,
-                  controller: _signupPass,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.next,
-                  hintText: "$new_pass...",
-                  labelText: "$new_pass",
-                  autofillHints: [AutofillHints.newPassword],
-                  isHiddenPass: _isHiddenPass,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  _isHiddenPass ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isHiddenPass = !_isHiddenPass;
-                  });
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 21),
-          Row(
-            children: [
-              Expanded(
-                child: textFormField(
-                  context,
-                  controller: _signupRePass,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.done,
-                  hintText: "$re_new_pass...",
-                  labelText: "$re_new_pass",
-                  isHiddenPass: _isHiddenPass,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  _isHiddenPass ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isHiddenPass = !_isHiddenPass;
-                  });
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 21),
-          InkWell(
-            onTap: () async {
-              var ge = await showDatePickerDialog(context);
-              if (ge != null) {
-                // ignore: division_optimization
-                if ((((DateTime.now().difference(ge)).inDays) / 365).toInt() <
-                    13) {
-                  customDialog(
-                    context,
-                    text: year_warn,
-                  );
-                } else {
-                  setState(() {
-                    _signupYear = ge;
-                  });
-                }
+          textFormField(
+            context,
+            controller: _name,
+            autofocus: true,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.next,
+            hintText: "$name...",
+            labelText: "$name",
+            autofillHints: [AutofillHints.name],
+            errorText: _nameErrorText,
+            onFieldSubmitted: (p0) {
+              if (p0.trim().isNotEmpty) {
+                setState(() {
+                  _nameErrorText = null;
+                });
               }
             },
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5),
+          ),
+          SizedBox(height: 21),
+          Stack(
+            children: [
+              textFormField(
+                context,
+                controller: _pass,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.next,
+                hintText: "$new_pass...",
+                labelText: "$new_pass",
+                autofillHints: [AutofillHints.newPassword],
+                isHiddenPass: _isHiddenPass,
+                errorText: _newPassErrorText,
+                onFieldSubmitted: (p0) async {
+                  try {
+                    if (_pass.text.trim().length < 7) {
+                      setState(() {
+                        _newPassErrorText = min5;
+                      });
+                    } else {
+                      setState(() {
+                        _newPassErrorText = null;
+                      });
+                      if (_year == null) {
+                        _selectYear(setState, year_warn);
+                      }
+                    }
+                  } catch (e) {}
+                },
+              ),
+              Positioned(
+                right: 0,
+                child: IconButton(
+                  icon: Icon(
+                    _isHiddenPass ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isHiddenPass = !_isHiddenPass;
+                    });
+                  },
                 ),
               ),
-              padding: const EdgeInsets.all(1.1),
-              child: Container(
-                height: 46,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(5),
-                  ),
-                ),
-                padding: const EdgeInsets.all(9.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    const Icon(
-                      Icons.date_range,
-                      color: Colors.black87,
+            ],
+          ),
+          SizedBox(height: 21),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () async {
+                  await _selectYear(setState, year_warn);
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(5),
                     ),
-                    Flexible(
-                      child: Text(
-                        _signupYear == null
-                            ? _utils.stringOneUpper(year_data)
-                            // ignore: division_optimization
-                            : "${_signupYear!.day}.${_signupYear!.month}.${_signupYear!.year}  (${(((DateTime.now().difference(_signupYear!)).inDays) / 365).toInt()} $year)",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16.8,
-                        ),
+                  ),
+                  padding: const EdgeInsets.all(1.1),
+                  child: Container(
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
                       ),
                     ),
-                    Container(),
-                  ],
+                    padding: const EdgeInsets.all(9.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(
+                          Icons.date_range,
+                          color: Colors.black87,
+                        ),
+                        Flexible(
+                          child: Text(
+                            _year == null
+                                ? _utils.stringOneUpper(year_data)
+                                // ignore: division_optimization
+                                : "${_year!.day}.${_year!.month}.${_year!.year}  (${(((DateTime.now().difference(_year!)).inDays) / 365).toInt()} $year)",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16.8,
+                            ),
+                          ),
+                        ),
+                        Container(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+              if (_yearErrorText != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Text(
+                    "$_yearErrorText",
+                    style: TextStyle(
+                      fontSize: 16.8,
+                      color: _utils.appColor.alertColor,
+                    ),
+                  ),
+                ),
+            ],
           ),
           SizedBox(height: 21),
           CustomButton(
             controller: _btnCtrl,
             text: _utils.stringOneUpper(signup),
             onPressed: () async {
-              bool status = await _signupFunc(setState);
-              if (status) {
-                TextInput.finishAutofillContext();
+              if (_name.text.trim().isEmpty) {
+                setState(() {
+                  _nameErrorText = name;
+                });
+                _btnCtrl.reset();
+              } else if (_pass.text.trim().length < 7) {
+                setState(() {
+                  _newPassErrorText = min5;
+                });
+                _btnCtrl.reset();
+              } else if (_year == null) {
+                setState(() {
+                  _yearErrorText = year_data;
+                });
+                _btnCtrl.reset();
+                _selectYear(setState, year_warn);
+              } else {
+                WpTokenModel? value = await _signupFunc(setState);
+                if (value != null) {
+                  TextInput.finishAutofillContext();
+                  Navigator.pop(context, value);
+                } else {
+                  _btnCtrl.reset();
+                }
               }
             },
           ),
           SizedBox(height: 25),
-          InkWell(
-            onTap: () {
-              changeLoginType(LoginType.login, setState);
-            },
-            child: Center(
-              child: Text(
-                signup_have,
-                style: TextStyle(
-                  fontSize: 17.0,
-                  color: Colors.green.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
   Widget _forgetWidgets(setState) {
-    // String back = _lang.getTextTR(langEnum: _langEnum, key: "back");
     String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
     String forget_b1 = _lang.getTextTR(langEnum: _langEnum, key: "forget_b1");
 
-    String forget_w1 = _lang.getTextTR(langEnum: _langEnum, key: "forget_w1");
-    String forget_enter_mail =
-        _lang.getTextTR(langEnum: _langEnum, key: "forget_enter_mail");
+    String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          forget_enter_mail,
+          forget,
           style: TextStyle(
-            fontSize: 15.2,
+            fontSize: 17.0,
             color: _utils.appColor.titleColor,
-            fontWeight: FontWeight.w400,
           ),
         ),
-        SizedBox(height: 21),
+        SizedBox(height: 25),
         textFormField(
           context,
-          controller: _forgetMail,
+          controller: _mail,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.done,
           hintText: "$email...",
@@ -535,22 +668,7 @@ Future<WpTokenModel?> loginPage({
         CustomButton(
           controller: _btnCtrl,
           text: _utils.stringOneUpper(forget_b1),
-          onPressed: () async => await _forgetFunc(),
-        ),
-        SizedBox(height: 20),
-        InkWell(
-          onTap: () {
-            changeLoginType(LoginType.signup, setState);
-          },
-          child: Text(
-            forget_w1,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15.2,
-              color: Colors.red,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+          onPressed: () async => await _forgetFunc(setState),
         ),
       ],
     );
@@ -573,91 +691,103 @@ Future<WpTokenModel?> loginPage({
           maxHeight: size.height,
           maxWidth: size.width,
         ),
-        child: SafeArea(
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      if (_loginType == LoginType.forget) {
-                        changeLoginType(LoginType.login, setState);
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Container(
-                      width: size.width,
-                      padding: EdgeInsets.all(20),
-                      color: _utils.appColor.scaffoldBg,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(
-                            (_loginType == LoginType.forget)
-                                ? Icons.arrow_back_ios
-                                : Icons.close,
-                            size: 25,
-                            color: _utils.appColor.titleColor,
-                          ),
-                          SizedBox(width: 9.0),
-                          Flexible(
-                            child: Text(
-                              (_loginType == LoginType.login)
-                                  ? login.toUpperCase()
-                                  : (_loginType == LoginType.signup)
-                                      ? signup.toUpperCase()
-                                      : (_loginType == LoginType.forget)
-                                          ? forget.toUpperCase()
-                                          : "",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 17.0,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1.0,
+        child: Theme(
+          data: ThemeData(
+            fontFamily: "jost",
+            useMaterial3: true,
+            primarySwatch: Colors.blue,
+          ),
+          child: SafeArea(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: size.width,
+                        color: _utils.appColor.scaffoldBg,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                if (_loginType != LoginType.enterMail) {
+                                  changeLoginType(
+                                      LoginType.enterMail, setState);
+                                } else {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                  top: 20,
+                                  bottom: 20,
+                                  left:
+                                      Utils().isDirectionRTL(context) ? 0 : 15,
+                                  right:
+                                      Utils().isDirectionRTL(context) ? 15 : 0,
+                                ),
+                                child: Icon(
+                                  (_loginType != LoginType.enterMail)
+                                      ? Icons.arrow_back_ios
+                                      : Icons.close,
+                                  size: 25,
+                                  color: _utils.appColor.titleColor,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(0.0), //! 8.0
-                      decoration: BoxDecoration(
-                        color: _utils.appColor.scaffoldBg,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: _utils.appColor.containerColor,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        child: ListView(
-                          children: [
-                            SizedBox(height: 8),
-                            if (topWidget != null) topWidget,
-                            if (topWidget != null) SizedBox(height: 10),
-                            if (_loginType == LoginType.login)
-                              _loginWidgets(setState),
-                            if (_loginType == LoginType.signup)
-                              _signupWidgets(setState),
-                            if (_loginType == LoginType.forget)
-                              _forgetWidgets(setState),
-                            SizedBox(height: size.height / 3),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: _utils.isDirectionRTL(context) ? 8 : 0,
+                                right: _utils.isDirectionRTL(context) ? 0 : 8,
+                              ),
+                              child: Image.network(
+                                "https://www.wipepp.com/images/wpp_a1_img1.png",
+                                fit: BoxFit.cover,
+                                height: 32,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(0.0), //! 8.0
+                          decoration: BoxDecoration(
+                            color: _utils.appColor.scaffoldBg,
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: _utils.appColor.containerColor,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(5.0),
+                              ),
+                            ),
+                            child: ListView(
+                              children: [
+                                SizedBox(height: 8),
+                                if (_loginType == LoginType.enterMail)
+                                  _mailEnterWidget(setState),
+                                if (_loginType == LoginType.loginEnterPass)
+                                  _loginEnterPassWidget(setState),
+                                if (_loginType == LoginType.forgetPass)
+                                  _forgetWidgets(setState),
+                                if (_loginType == LoginType.newUser)
+                                  _newUserWidget(setState),
+                                SizedBox(height: size.height / 3),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       );

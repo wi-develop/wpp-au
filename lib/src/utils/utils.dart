@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:platform_device_id/platform_device_id.dart';
-
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import '../models/app_color_model.dart';
+import './custom_launch_url.dart';
 
 class Utils {
   AppColor get appColor => _appColor;
@@ -16,6 +17,24 @@ class Utils {
     alertColor: Colors.red,
     buttonColor: Colors.blue,
   );
+
+  goUrl(BuildContext? context, String url) async {
+    try {
+      if (context != null) {
+        return customWebView(
+          context: context,
+          url: url.trim(),
+        );
+      } else {
+        await url_launcher.launchUrl(
+          Uri.parse(url.trim()),
+          mode: url_launcher.LaunchMode.externalApplication,
+        );
+      }
+    } catch (e) {
+      debugPrint("goUrl ERROR : $e");
+    }
+  }
 
   Future<String> _getDeviceId() async {
     try {
@@ -65,5 +84,23 @@ class Utils {
     } catch (e) {
       return str;
     }
+  }
+
+  bool isValidEmail(String email) {
+    if (!email.contains('@')) {
+      return false;
+    }
+
+    final partsBeforeAt = email.split('@');
+    if (partsBeforeAt.length != 2 || partsBeforeAt.first.length < 2) {
+      return false;
+    }
+
+    final partsAfterDot = partsBeforeAt[1].split('.');
+    if (partsAfterDot.length < 2 || partsAfterDot.last.length < 2) {
+      return false;
+    }
+
+    return true;
   }
 }

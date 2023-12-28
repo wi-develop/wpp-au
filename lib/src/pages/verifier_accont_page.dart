@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../../wipepp_auth.dart';
+import '../../wpp_au.dart';
 import '../components/dialogs/custom_dialog.dart';
 import '../components/forms/custom_button.dart';
 import '../components/forms/text_form_field.dart';
@@ -315,76 +315,83 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
           maxHeight: size.height,
           maxWidth: size.width,
         ),
-        child: SafeArea(
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: size.width,
-                      padding: EdgeInsets.all(20),
-                      color: _utils.appColor.scaffoldBg,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.close,
-                            size: 26,
-                            color: _utils.appColor.titleColor,
-                          ),
-                          SizedBox(width: 8.0),
-                          Flexible(
-                            child: Text(
-                              (_pageType == _PageType.verifier)
-                                  ? verify_acc.toUpperCase()
-                                  : (_pageType == _PageType.changeMail)
-                                      ? change_email_B1.toUpperCase()
-                                      : "",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 19.0,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1.0,
+        child: Theme(
+          data: ThemeData(
+            fontFamily: "jost",
+            useMaterial3: true,
+            primarySwatch: Colors.blue,
+          ),
+          child: SafeArea(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: size.width,
+                        padding: EdgeInsets.all(20),
+                        color: _utils.appColor.scaffoldBg,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.close,
+                              size: 26,
+                              color: _utils.appColor.titleColor,
+                            ),
+                            SizedBox(width: 8.0),
+                            Flexible(
+                              child: Text(
+                                (_pageType == _PageType.verifier)
+                                    ? verify_acc.toUpperCase()
+                                    : (_pageType == _PageType.changeMail)
+                                        ? change_email_B1.toUpperCase()
+                                        : "",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 19.0,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 1.0,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(0.0), //! 8.0
-                      decoration: BoxDecoration(
-                        color: _utils.appColor.scaffoldBg,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: _utils.appColor.containerColor,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        child: ListView(
-                          children: [
-                            SizedBox(height: 8),
-                            if (_pageType == _PageType.verifier)
-                              _verifierWidgets(setState),
-                            if (_pageType == _PageType.changeMail)
-                              _changeEmailWidgets(setState),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            },
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(0.0), //! 8.0
+                        decoration: BoxDecoration(
+                          color: _utils.appColor.scaffoldBg,
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: _utils.appColor.containerColor,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5.0),
+                            ),
+                          ),
+                          child: ListView(
+                            children: [
+                              SizedBox(height: 8),
+                              if (_pageType == _PageType.verifier)
+                                _verifierWidgets(setState),
+                              if (_pageType == _PageType.changeMail)
+                                _changeEmailWidgets(setState),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       );
