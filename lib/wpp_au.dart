@@ -65,6 +65,42 @@ class WipeppAuth {
     }
   }
 
+  Future<bool> verifierAccont({
+    required WpTokenModel wpTokenModel,
+    bool isDemoMail = false,
+    String? userMail,
+  }) async {
+    try {
+      if (_initializeContext == null || _clientAppKeys == null) {
+        log(
+          "initialize ERROR.",
+          error: "initialize ERROR.",
+          stackTrace: StackTrace.current,
+        );
+        return false;
+      } else {
+        var value = await verifierAccontPage(
+          context: _initializeContext!,
+          wpTokenModel: wpTokenModel,
+          langEnum: _langEnum,
+          baseUrl: _clientAppKeys!.baseUrl,
+          isDemoMail: isDemoMail,
+          userMail: userMail,
+        );
+        if (value == null) {
+          return false;
+        } else if (value.data != null) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } catch (e) {
+      debugPrint("verifierAccont(catch) : $e");
+      return false;
+    }
+  }
+
   Future<ResponseModel<MyUserModel?>> _loginAndReturnUser() async {
     try {
       if (_initializeContext == null || _clientAppKeys == null) {

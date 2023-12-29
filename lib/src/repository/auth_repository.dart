@@ -351,6 +351,41 @@ class AuthRepository {
     }
   }
 
+  Future<ResponseModel<bool>> mailCodeCtrl({
+    required WpTokenModel wpTokenModel,
+    required String baseUrl,
+  }) async {
+    try {
+      var newWpTokenModel = await _tokenExpCtrl(
+        wpTokenModel: wpTokenModel,
+        baseUrl: baseUrl,
+      );
+      ApiModel res = await _api.post(
+        baseUrl: baseUrl,
+        url: "/a2/mailCodeCtrl",
+        token: newWpTokenModel.wpToken,
+        body: {},
+      );
+      if (res.status == ResponseStatus.success) {
+        return ResponseModel(
+          data: true,
+          wpTokenModel: newWpTokenModel,
+        );
+      } else {
+        return ResponseModel(
+          data: false,
+          errorMsg: res.errorDetail,
+          wpTokenModel: newWpTokenModel,
+        );
+      }
+    } catch (e) {
+      return ResponseModel(
+        data: false,
+        errorMsg: e.toString(),
+      );
+    }
+  }
+
   Future<ResponseModel<bool>> changeMail({
     required String baseUrl,
     required WpTokenModel wpTokenModel,

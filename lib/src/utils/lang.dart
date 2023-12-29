@@ -30,6 +30,11 @@ class Lang {
 
   Map<LangEnum, Map<String, String>> _tMaps = {
     LangEnum.en: {
+      "changeMailSuccess":
+          "Success! Please check your email inbox. The confirmation code is usually delivered within 2 minutes. (Also, check your spam folder.)",
+      "demoUserEnterMail":
+          "Please enter your email address. (A confirmation code will be sent.)",
+      "mail": "Your email address",
       "createWp": "Create a Wipepp Account",
       "min5": "The password must be at least 6 characters long.",
       "invalidPass":
@@ -65,7 +70,7 @@ class Lang {
           "Your password change request has been sent to your e-mail address. Check your email box. (Check your spam folder too.)",
       "send": "Send",
       "verifier_T1":
-          "Enter the confirmation code sent to your email address into the field below.",
+          "Enter the confirmation code sent to your email address below.",
       "verifier_B1": "Resend verification code",
       "change_email_T1":
           "This email address doesn't belong to you? Change your email address.",

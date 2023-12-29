@@ -11,13 +11,15 @@ import '../repository/auth_repository.dart';
 import '../utils/lang.dart';
 import '../utils/utils.dart';
 
-enum _PageType { verifier, changeMail }
+enum _PageType { verifier, changeMail, enterMailDemoMail }
 
 Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
   required BuildContext context,
   required WpTokenModel wpTokenModel,
   required LangEnum langEnum,
   required String baseUrl,
+  bool isDemoMail = false,
+  String? userMail,
 }) async {
   final _utils = Utils();
   final _lang = Lang();
@@ -25,9 +27,35 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
 
   _PageType _pageType = _PageType.verifier;
 
+  if (isDemoMail) {
+    _pageType = _PageType.enterMailDemoMail;
+  }
+
+  Future<void> initMailCodeCtrl() async {
+    try {
+      if (isDemoMail == false) {
+        var value = await _authRepository.mailCodeCtrl(
+          baseUrl: baseUrl,
+          wpTokenModel: wpTokenModel,
+        );
+        if (value.data) {
+          // true
+        } else {
+          // false
+        }
+      }
+    } catch (e) {
+      //
+    }
+  }
+
+  initMailCodeCtrl();
+
   final _newMail = TextEditingController();
   final _code = TextEditingController();
   final _btnCtrl = RoundedLoadingButtonController();
+
+  String? newMailErrorText;
 
   String verify_acc = _lang.getTextTR(langEnum: langEnum, key: "verify_acc");
   String change_email_B1 =
@@ -87,8 +115,8 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
 
   Future<void> _changeEmailFunc(setState) async {
     String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
-    String verifier_T1 =
-        _lang.getTextTR(langEnum: langEnum, key: "verifier_T1");
+    String changeMailSuccess =
+        _lang.getTextTR(langEnum: langEnum, key: "changeMailSuccess");
 
     try {
       if (_newMail.text.trim().length > 1) {
@@ -98,10 +126,15 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
           newEmail: _newMail.text.trim(),
         );
         if (value.data) {
+          setState(() {
+            userMail = _newMail.text.trim();
+            isDemoMail = false;
+          });
           changePageType(_PageType.verifier, setState);
+
           customDialog(
             context,
-            text: "${_newMail.text.trim()} \n" + verifier_T1,
+            text: "${_newMail.text.trim()} \n" + changeMailSuccess,
           );
           _newMail.clear();
         } else {
@@ -132,6 +165,7 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
 
   Widget _verifierWidgets(setState) {
     String send = _lang.getTextTR(langEnum: langEnum, key: "send");
+    String mail = _lang.getTextTR(langEnum: langEnum, key: "mail");
     String verifier_T1 =
         _lang.getTextTR(langEnum: langEnum, key: "verifier_T1");
     String verifier_B1 =
@@ -150,6 +184,15 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
             fontSize: 16.6,
           ),
         ),
+        if (userMail != null && !isDemoMail) SizedBox(height: 8),
+        if (userMail != null && !isDemoMail)
+          Text(
+            _utils.stringOneUpper(mail) + ": $userMail",
+            style: TextStyle(
+              fontSize: 16.6,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         SizedBox(height: 25),
         textFormField(
           context,
@@ -298,6 +341,68 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
     );
   }
 
+  Widget _enterEmailWidgets(setState) {
+    String demoUserEnterMail =
+        _lang.getTextTR(langEnum: langEnum, key: "demoUserEnterMail");
+    String email = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String next = _lang.getTextTR(langEnum: langEnum, key: "next");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          demoUserEnterMail,
+          style: TextStyle(
+            fontSize: 16.8,
+          ),
+        ),
+        SizedBox(height: 30.0),
+        textFormField(
+          context,
+          controller: _newMail,
+          keyboardType: TextInputType.emailAddress,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          hintText: "$email...",
+          labelText: "$email",
+          errorText: newMailErrorText,
+          onFieldSubmitted: (p0) {
+            if (_utils.isValidEmail(_newMail.text.trim())) {
+              if (newMailErrorText != null) {
+                setState(() {
+                  newMailErrorText = null;
+                });
+              }
+            } else {
+              setState(() {
+                newMailErrorText = email;
+              });
+            }
+          },
+        ),
+        SizedBox(height: 25),
+        CustomButton(
+          controller: _btnCtrl,
+          text: _utils.stringOneUpper(next),
+          onPressed: () async {
+            if (_utils.isValidEmail(_newMail.text.trim())) {
+              setState(() {
+                newMailErrorText = null;
+              });
+              await _changeEmailFunc(setState);
+            } else {
+              setState(() {
+                newMailErrorText = email;
+              });
+              _btnCtrl.reset();
+            }
+          },
+        ),
+        SizedBox(height: 10),
+      ],
+    );
+  }
+
   return await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -364,7 +469,6 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
                     ),
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.all(0.0), //! 8.0
                         decoration: BoxDecoration(
                           color: _utils.appColor.scaffoldBg,
                         ),
@@ -377,12 +481,15 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
                             ),
                           ),
                           child: ListView(
+                            padding: EdgeInsets.symmetric(horizontal: 4.0),
                             children: [
                               SizedBox(height: 8),
                               if (_pageType == _PageType.verifier)
                                 _verifierWidgets(setState),
                               if (_pageType == _PageType.changeMail)
                                 _changeEmailWidgets(setState),
+                              if (_pageType == _PageType.enterMailDemoMail)
+                                _enterEmailWidgets(setState),
                             ],
                           ),
                         ),
