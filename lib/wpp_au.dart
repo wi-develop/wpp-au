@@ -153,11 +153,11 @@ class WipeppAuth {
 
       if (value.data == null && _initializeContext != null) {
         if (value.errorMsg.toString() ==
-            '{"statusCode":401,"msg":"U_P_0","errorMessage":null,"key":null}') {
+            '{"statusCode":401,"msg":"U_P_0","errorMessage":"","key":null}') {
           //* change password.
           return _loginAndReturnUser();
         } else if (value.errorMsg.toString() ==
-            '{"statusCode":401,"msg":"U_0","errorMessage":null,"key":null}') {
+            '{"statusCode":401,"msg":"U_0","errorMessage":"","key":"U_0"}') {
           //* confirm accont
           var value2 = await verifierAccontPage(
             context: _initializeContext!,
@@ -171,7 +171,7 @@ class WipeppAuth {
             return value;
           }
         } else if (value.errorMsg.toString() ==
-            '{"statusCode":400,"msg":"jwt expired","errorMessage":null,"key":null}') {
+            '{"statusCode":400,"msg":"jwt expired","errorMessage":"","key":null}') {
           var valueUser2 = await authRepository.getMyUser(
             wpTokenModel: wpTokenModel,
             baseUrl: _clientAppKeys!.baseUrl,
