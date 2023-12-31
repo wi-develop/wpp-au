@@ -57,12 +57,14 @@ class AuthRepository {
     required String loginMail,
     required String loginPass,
     required String baseUrl,
+    String? lang,
   }) async {
     try {
       String deviceid = await _utils.getDeviceId;
       String token = _tokenService.login(
         clientAppKeys: clientAppKeys,
         loginMail: loginMail,
+        deviceid: deviceid,
       );
 
       var res = await _api.post(
@@ -72,6 +74,7 @@ class AuthRepository {
         body: {
           "login_pass": loginPass,
           "deviceid": deviceid,
+          "lang": lang ?? _utils.getLang,
         },
       );
 
@@ -104,6 +107,7 @@ class AuthRepository {
       String token = _tokenService.login(
         clientAppKeys: clientAppKeys,
         loginMail: mail,
+        deviceid: deviceid,
       );
 
       var res = await _api.post(
@@ -137,6 +141,7 @@ class AuthRepository {
     required String signupName,
     required DateTime signupYear,
     required String baseUrl,
+    String? lang,
   }) async {
     try {
       String deviceid = await _utils.getDeviceId;
@@ -147,6 +152,7 @@ class AuthRepository {
       String token = _tokenService.signup(
         clientAppKeys: clientAppKeys,
         signupMail: signupMail,
+        deviceid: deviceid,
       );
 
       var res = await _api.post(
@@ -158,6 +164,7 @@ class AuthRepository {
           "signup_name": signupName,
           "signup_year": birthdayString,
           "signup_pass": signupPass,
+          "lang": lang ?? _utils.getLang,
         },
       );
 

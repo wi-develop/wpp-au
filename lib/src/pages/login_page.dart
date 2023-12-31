@@ -3,12 +3,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rounded_loading_button/rounded_loading_button.dart';
-
 import '../../wpp_au.dart';
 import '../components/dialogs/custom_dialog.dart';
 import '../components/dialogs/date_picker_dialog.dart';
-import '../components/forms/custom_button.dart';
+import '../components/forms/load_btn.dart';
 import '../components/forms/text_form_field.dart';
 import '../repository/auth_repository.dart';
 import '../utils/lang.dart';
@@ -39,7 +37,7 @@ Future<WpTokenModel?> loginPage({
   String? _nameErrorText;
   String? _yearErrorText;
 
-  final _btnCtrl = RoundedLoadingButtonController();
+  var _btnCtrl = LoadBtnController.idle;
   String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
 
   void changeLoginType(LoginType loginType, setState) {
@@ -47,6 +45,18 @@ Future<WpTokenModel?> loginPage({
       setState(() {
         _loginType = loginType;
       });
+    }
+  }
+
+  btnCtrlReset(setState) {
+    try {
+      if (context.mounted) {
+        setState(() {
+          _btnCtrl = LoadBtnController.idle;
+        });
+      }
+    } catch (e) {
+      //
     }
   }
 
@@ -63,7 +73,7 @@ Future<WpTokenModel?> loginPage({
     }
   }
 
-  Future<WpTokenModel?> _loginFunc() async {
+  Future<WpTokenModel?> _loginFunc(setState) async {
     String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
     String invalidPass =
         _lang.getTextTR(langEnum: _langEnum, key: "invalidPass");
@@ -79,7 +89,7 @@ Future<WpTokenModel?> loginPage({
         if (value.data != null) {
           return value.data;
         } else {
-          _btnCtrl.reset();
+          btnCtrlReset(setState);
           if (context.mounted) {
             customDialog(
               context,
@@ -89,7 +99,7 @@ Future<WpTokenModel?> loginPage({
           return null;
         }
       } else {
-        _btnCtrl.reset();
+        btnCtrlReset(setState);
         if (context.mounted) {
           customDialog(
             context,
@@ -123,11 +133,12 @@ Future<WpTokenModel?> loginPage({
           signupPass: _pass.text,
           signupName: _name.text.trim(),
           signupYear: _year!,
+          lang: langEnum != null ? langEnum.name : null,
         );
         if (value.data != null) {
           return value.data;
         } else {
-          _btnCtrl.reset();
+          btnCtrlReset(setState);
           if (context.mounted) {
             if (value.errorMsg.toString() ==
                 '{"statusCode":451,"msg":"E_113","errorMessage":"error: duplicate key value violates unique constraint \\"users_mail_key\\"","key":null}'
@@ -155,12 +166,81 @@ Future<WpTokenModel?> loginPage({
             context,
             text: fill,
           );
-          _btnCtrl.reset();
+          btnCtrlReset(setState);
         }
         return null;
       }
     } catch (e) {
-      _btnCtrl.reset();
+      btnCtrlReset(setState);
+      customDialog(
+        context,
+        text: "OPPS! Try again.",
+      );
+      return null;
+    }
+  }
+
+  Future<WpTokenModel?> _anonimFunc(dynamic setState) async {
+    String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
+    String usertrue = _lang.getTextTR(langEnum: _langEnum, key: "usertrue");
+
+    try {
+      if (_year != null) {
+        String deviceId = await _utils.getDeviceId;
+        String name = _name.text.trim();
+        String mail = deviceId + "@demo.wipepp.com";
+        String pass = _utils.generateRandomString(12);
+
+        if (_name.text.trim().length < 2) {
+          name = "U${_year!.day.toString().hashCode}";
+        }
+
+        var value = await _authRepository.signup(
+          clientAppKeys: clientAppKeys,
+          baseUrl: clientAppKeys.baseUrl,
+          signupMail: mail.trim(),
+          signupPass: pass,
+          signupName: name.trim(),
+          signupYear: _year!,
+          lang: langEnum != null ? langEnum.name : null,
+        );
+        if (value.data != null) {
+          return value.data;
+        } else {
+          btnCtrlReset(setState);
+          if (context.mounted) {
+            if (value.errorMsg.toString() ==
+                '{"statusCode":451,"msg":"E_113","errorMessage":"error: duplicate key value violates unique constraint \\"users_mail_key\\"","key":null}'
+                    .toString()) {
+              changeLoginType(
+                LoginType.enterMail,
+                setState,
+              );
+              customDialog(
+                context,
+                text: usertrue,
+              );
+            } else {
+              customDialog(
+                context,
+                text: "Try Again.",
+              );
+            }
+          }
+          return null;
+        }
+      } else {
+        if (context.mounted) {
+          customDialog(
+            context,
+            text: fill,
+          );
+          btnCtrlReset(setState);
+        }
+        return null;
+      }
+    } catch (e) {
+      btnCtrlReset(setState);
       customDialog(
         context,
         text: "OPPS! Try again.",
@@ -182,14 +262,14 @@ Future<WpTokenModel?> loginPage({
           mail: _mail.text.trim(),
         );
         if (value.data) {
-          _btnCtrl.reset();
+          btnCtrlReset(setState);
           changeLoginType(LoginType.loginEnterPass, setState);
           customDialog(
             context,
             text: forgetSuccess,
           );
         } else {
-          _btnCtrl.reset();
+          btnCtrlReset(setState);
           if (context.mounted) {
             customDialog(
               context,
@@ -198,7 +278,7 @@ Future<WpTokenModel?> loginPage({
           }
         }
       } else {
-        _btnCtrl.reset();
+        btnCtrlReset(setState);
         if (context.mounted) {
           customDialog(
             context,
@@ -237,6 +317,7 @@ Future<WpTokenModel?> loginPage({
     String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
     String next = _lang.getTextTR(langEnum: _langEnum, key: "next");
     String enterMail = _lang.getTextTR(langEnum: _langEnum, key: "email");
+    String anonimCon = _lang.getTextTR(langEnum: _langEnum, key: "anonimCon");
 
     String wppAu1 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu1");
     String wppAu2 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu2");
@@ -302,7 +383,7 @@ Future<WpTokenModel?> loginPage({
           ),
         ),
         SizedBox(height: 10),
-        CustomButton(
+        LoadBtn(
           controller: _btnCtrl,
           text: _utils.stringOneUpper(next),
           onPressed: () async {
@@ -310,29 +391,44 @@ Future<WpTokenModel?> loginPage({
               setState(() {
                 _mailErrorText = enterMail;
               });
-              _btnCtrl.reset();
+              btnCtrlReset(setState);
             } else if (_utils.isValidEmail(_mail.text.trim()) == false) {
               setState(() {
                 _mailErrorText = email;
               });
-              _btnCtrl.reset();
+              btnCtrlReset(setState);
             } else {
               bool? status = await _mailCFunc();
               if (status == null) {
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
               } else if (status == false) {
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
                 changeLoginType(LoginType.newUser, setState);
                 setState(() {
                   _mailErrorText = null;
                 });
               } else {
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
                 changeLoginType(LoginType.loginEnterPass, setState);
                 setState(() {
                   _mailErrorText = null;
                 });
               }
+            }
+          },
+        ),
+        const SizedBox(height: 30),
+        LoadBtn(
+          controller: _btnCtrl,
+          text: _utils.stringOneUpper(anonimCon),
+          buttonColor: Colors.transparent,
+          textColor: Colors.black,
+          onPressed: () async {
+            try {
+              btnCtrlReset(setState);
+              changeLoginType(LoginType.anonimNewUser, setState);
+            } catch (e) {
+              btnCtrlReset(setState);
             }
           },
         ),
@@ -403,17 +499,17 @@ Future<WpTokenModel?> loginPage({
             ),
           ),
           SizedBox(height: 25),
-          CustomButton(
+          LoadBtn(
             controller: _btnCtrl,
             text: _utils.stringOneUpper(login),
             onPressed: () async {
               if (_pass.text.trim().length < 3) {
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
                 setState(() {
                   _passErrorText = notEmptyText;
                 });
               } else {
-                WpTokenModel? value = await _loginFunc();
+                WpTokenModel? value = await _loginFunc(setState);
                 if (value != null) {
                   TextInput.finishAutofillContext();
                   Navigator.pop(context, value);
@@ -601,7 +697,7 @@ Future<WpTokenModel?> loginPage({
             ],
           ),
           SizedBox(height: 21),
-          CustomButton(
+          LoadBtn(
             controller: _btnCtrl,
             text: _utils.stringOneUpper(signup),
             onPressed: () async {
@@ -609,17 +705,17 @@ Future<WpTokenModel?> loginPage({
                 setState(() {
                   _nameErrorText = name;
                 });
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
               } else if (_pass.text.trim().length < 7) {
                 setState(() {
                   _newPassErrorText = min5;
                 });
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
               } else if (_year == null) {
                 setState(() {
                   _yearErrorText = year_data;
                 });
-                _btnCtrl.reset();
+                btnCtrlReset(setState);
                 _selectYear(setState, year_warn);
               } else {
                 WpTokenModel? value = await _signupFunc(setState);
@@ -627,7 +723,7 @@ Future<WpTokenModel?> loginPage({
                   TextInput.finishAutofillContext();
                   Navigator.pop(context, value);
                 } else {
-                  _btnCtrl.reset();
+                  btnCtrlReset(setState);
                 }
               }
             },
@@ -665,12 +761,141 @@ Future<WpTokenModel?> loginPage({
           autofillHints: [AutofillHints.email],
         ),
         SizedBox(height: 25),
-        CustomButton(
+        LoadBtn(
           controller: _btnCtrl,
           text: _utils.stringOneUpper(forget_b1),
           onPressed: () async => await _forgetFunc(setState),
         ),
       ],
+    );
+  }
+
+  Widget _anonimNewUserWidget(setState) {
+    String name = _lang.getTextTR(langEnum: _langEnum, key: "name");
+    String year_data = _lang.getTextTR(langEnum: _langEnum, key: "year_data");
+    String year = _lang.getTextTR(langEnum: _langEnum, key: "year");
+    String year_warn = _lang.getTextTR(langEnum: _langEnum, key: "year_warn");
+    String anonimT1 = _lang.getTextTR(langEnum: _langEnum, key: "anonimT1");
+    String continueStr =
+        _lang.getTextTR(langEnum: _langEnum, key: "continueStr");
+
+    return AutofillGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            _utils.stringOneUpper(anonimT1),
+            style: TextStyle(
+              fontSize: 17.0,
+              color: _utils.appColor.titleColor,
+            ),
+          ),
+          SizedBox(height: 25),
+          textFormField(
+            context,
+            controller: _name,
+            autofocus: true,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.next,
+            hintText: "$name...",
+            labelText: "$name",
+            autofillHints: [AutofillHints.name],
+            errorText: _nameErrorText,
+            onFieldSubmitted: (p0) {
+              if (_year == null) {
+                _selectYear(setState, year_warn);
+              }
+            },
+          ),
+          SizedBox(height: 21),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () async {
+                  await _selectYear(setState, year_warn);
+                },
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(5),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(1.1),
+                  child: Container(
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(9.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Icon(
+                          Icons.date_range,
+                          color: Colors.black87,
+                        ),
+                        Flexible(
+                          child: Text(
+                            _year == null
+                                ? _utils.stringOneUpper(year_data)
+                                // ignore: division_optimization
+                                : "${_year!.day}.${_year!.month}.${_year!.year}  (${(((DateTime.now().difference(_year!)).inDays) / 365).toInt()} $year)",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16.8,
+                            ),
+                          ),
+                        ),
+                        Container(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (_yearErrorText != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Text(
+                    "$_yearErrorText",
+                    style: TextStyle(
+                      fontSize: 16.8,
+                      color: _utils.appColor.alertColor,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 21),
+          LoadBtn(
+            controller: _btnCtrl,
+            text: _utils.stringOneUpper(continueStr),
+            onPressed: () async {
+              if (_year == null) {
+                setState(() {
+                  _yearErrorText = year_data;
+                });
+                btnCtrlReset(setState);
+                _selectYear(setState, year_warn);
+              } else {
+                WpTokenModel? value = await _anonimFunc(setState);
+                if (value != null) {
+                  Navigator.pop(context, value);
+                } else {
+                  btnCtrlReset(setState);
+                }
+              }
+            },
+          ),
+          SizedBox(height: 25),
+        ],
+      ),
     );
   }
 
@@ -777,6 +1002,8 @@ Future<WpTokenModel?> loginPage({
                                   _forgetWidgets(setState),
                                 if (_loginType == LoginType.newUser)
                                   _newUserWidget(setState),
+                                if (_loginType == LoginType.anonimNewUser)
+                                  _anonimNewUserWidget(setState),
                                 SizedBox(height: size.height / 3),
                               ],
                             ),

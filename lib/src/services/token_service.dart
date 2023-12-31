@@ -42,10 +42,12 @@ class TokenService {
   String signup({
     required ClientAppKeys clientAppKeys,
     required String signupMail,
+    required String deviceid,
   }) {
     var jwt = JWT({
       "signup_mail": signupMail,
       "app_id": clientAppKeys.appId,
+      "token_deviceid": deviceid,
     });
 
     String key = clientAppKeys.appLoginKey;
@@ -60,10 +62,12 @@ class TokenService {
   String login({
     required ClientAppKeys clientAppKeys,
     required String loginMail,
+    required String deviceid,
   }) {
     var jwt = JWT({
       "login_mail": loginMail,
       "app_id": clientAppKeys.appId,
+      "token_deviceid": deviceid,
     });
 
     String key = clientAppKeys.appLoginKey;

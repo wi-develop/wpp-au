@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:platform_device_id/platform_device_id.dart';
@@ -8,6 +11,7 @@ import './custom_launch_url.dart';
 class Utils {
   AppColor get appColor => _appColor;
   Future<String> get getDeviceId async => await _getDeviceId();
+  String get getLang => _getLang();
 
   AppColor _appColor = AppColor(
     scaffoldBg: Colors.grey.shade100,
@@ -17,6 +21,17 @@ class Utils {
     alertColor: Colors.red,
     buttonColor: Colors.blue,
   );
+
+  String _getLang() {
+    try {
+      String localePlatform = Platform.localeName;
+      String localeStr = localePlatform.split("_")[0];
+      return localeStr;
+    } catch (e) {
+      debugPrint("_getLang ERROR : $e");
+      return "en";
+    }
+  }
 
   goUrl(BuildContext? context, String url) async {
     try {
@@ -73,6 +88,20 @@ class Utils {
     } catch (e) {
       return str;
     }
+  }
+
+  String generateRandomString(int length) {
+    Random random = Random();
+    const String chars =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return String.fromCharCodes(
+      List.generate(
+        length,
+        (index) => chars.codeUnitAt(
+          random.nextInt(chars.length),
+        ),
+      ),
+    );
   }
 
   String _getCapitalizeString(String str) {
