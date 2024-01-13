@@ -16,12 +16,16 @@ Future<WpTokenModel?> loginPage({
   required BuildContext context,
   required ClientAppKeys clientAppKeys,
   LangEnum? langEnum,
-  Widget? topWidget,
+  String? infoText,
+  String? mail,
+  bool redirectEnterPassPage = false,
 }) async {
   final _utils = Utils();
   final _lang = Lang();
   final _authRepository = AuthRepository();
   bool _isHiddenPass = true;
+
+  bool isInit = false;
 
   LangEnum _langEnum = LangEnum.en;
   LoginType _loginType = LoginType.enterMail;
@@ -57,6 +61,13 @@ Future<WpTokenModel?> loginPage({
       }
     } catch (e) {
       //
+    }
+  }
+
+  void initFunc(setState) {
+    if (redirectEnterPassPage && mail != null) {
+      _mail.text = mail;
+      changeLoginType(LoginType.loginEnterPass, setState);
     }
   }
 
@@ -326,6 +337,18 @@ Future<WpTokenModel?> loginPage({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (infoText != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 15.0),
+            child: Text(
+              infoText,
+              style: TextStyle(
+                fontSize: 16.8,
+                fontWeight: FontWeight.w500,
+                fontFamily: "jost",
+              ),
+            ),
+          ),
         RichText(
           text: TextSpan(
             style: TextStyle(fontSize: 18.0, height: 1.56, fontFamily: "jost"),
@@ -440,7 +463,7 @@ Future<WpTokenModel?> loginPage({
     String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
     String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
     String pass = _lang.getTextTR(langEnum: _langEnum, key: "pass");
-    String showPass = _lang.getTextTR(langEnum: _langEnum, key: "showPass");
+    //String showPass = _lang.getTextTR(langEnum: _langEnum, key: "showPass");
     String notEmptyText =
         _lang.getTextTR(langEnum: _langEnum, key: "notEmptyText");
 
@@ -448,6 +471,18 @@ Future<WpTokenModel?> loginPage({
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          if (infoText != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 15.0),
+              child: Text(
+                infoText,
+                style: TextStyle(
+                  fontSize: 16.8,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "jost",
+                ),
+              ),
+            ),
           Text(
             pass,
             style: TextStyle(fontSize: 17.0),
@@ -462,41 +497,36 @@ Future<WpTokenModel?> loginPage({
             autofillHints: [AutofillHints.email],
           ),
           SizedBox(height: 25),
-          textFormField(
-            context,
-            controller: _pass,
-            autofocus: true,
-            keyboardType: TextInputType.visiblePassword,
-            textInputAction: TextInputAction.done,
-            hintText: "$pass...",
-            labelText: "$pass",
-            autofillHints: [AutofillHints.password],
-            isHiddenPass: _isHiddenPass,
-            errorText: _passErrorText,
-          ),
-          SizedBox(height: 20),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isHiddenPass = _isHiddenPass ? false : true;
-              });
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  _isHiddenPass
-                      ? Icons.check_box_outline_blank
-                      : Icons.check_box,
-                  size: 24,
+          Stack(
+            children: [
+              textFormField(
+                context,
+                controller: _pass,
+                autofocus: true,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.done,
+                hintText: "$pass...",
+                labelText: "$pass",
+                autofillHints: [AutofillHints.password],
+                isHiddenPass: _isHiddenPass,
+                errorText: _passErrorText,
+              ),
+              Positioned(
+                left: _utils.isDirectionRTL(context) ? 2 : null,
+                right: _utils.isDirectionRTL(context) ? null : 2,
+                child: IconButton(
+                  icon: Icon(
+                    _isHiddenPass ? Icons.visibility_off : Icons.visibility,
+                    size: 23,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isHiddenPass = _isHiddenPass ? false : true;
+                    });
+                  },
                 ),
-                SizedBox(width: 6.0),
-                Text(
-                  Utils().stringOneUpper(showPass),
-                  style: TextStyle(fontSize: 16.8),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           SizedBox(height: 25),
           LoadBtn(
@@ -925,6 +955,12 @@ Future<WpTokenModel?> loginPage({
           child: SafeArea(
             child: StatefulBuilder(
               builder: (context, setState) {
+                if (isInit == false) {
+                  initFunc(setState);
+                  setState(() {
+                    isInit = true;
+                  });
+                }
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: Column(

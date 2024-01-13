@@ -2,22 +2,24 @@
 
 import 'package:flutter/material.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:wpp_au/src/pages/login_page.dart';
 
 import '../../wpp_au.dart';
 import '../components/dialogs/custom_dialog.dart';
 import '../components/forms/custom_button.dart';
 import '../components/forms/text_form_field.dart';
+import '../models/verifier_model.dart';
 import '../repository/auth_repository.dart';
 import '../utils/lang.dart';
 import '../utils/utils.dart';
 
 enum _PageType { verifier, changeMail, enterMailDemoMail }
 
-Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
+Future<ResponseModel<VerifierModel?>?> verifierAccontPage({
   required BuildContext context,
   required WpTokenModel wpTokenModel,
   required LangEnum langEnum,
-  required String baseUrl,
+  required ClientAppKeys clientAppKeys,
   bool isDemoMail = false,
   String? userMail,
 }) async {
@@ -35,7 +37,7 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
     try {
       if (isDemoMail == false) {
         var value = await _authRepository.mailCodeCtrl(
-          baseUrl: baseUrl,
+          baseUrl: clientAppKeys.baseUrl,
           wpTokenModel: wpTokenModel,
         );
         if (value.data) {
@@ -69,6 +71,19 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
     }
   }
 
+  Future<bool?> _mailCFunc({required String mail}) async {
+    try {
+      var value = await _authRepository.mailC(
+        baseUrl: clientAppKeys.baseUrl,
+        clientAppKeys: clientAppKeys,
+        mail: mail.trim(),
+      );
+      return value;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> _verifierFunc() async {
     String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
     String v_c_err = _lang.getTextTR(langEnum: langEnum, key: "v_c_err");
@@ -76,17 +91,26 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
     try {
       if (_code.text.trim().length > 1) {
         var value = await _authRepository.verifierEmailAccont(
-          baseUrl: baseUrl,
+          baseUrl: clientAppKeys.baseUrl,
           wpTokenModel: wpTokenModel,
           code: _code.text.trim(),
         );
         if (value.data) {
           var valueUser = await _authRepository.getMyUser(
-            baseUrl: baseUrl,
+            baseUrl: clientAppKeys.baseUrl,
             wpTokenModel: wpTokenModel,
           );
 
-          Navigator.pop(context, valueUser);
+          Navigator.pop(
+            context,
+            ResponseModel(
+              data: VerifierModel(
+                status: true,
+                wpTokenModel: null,
+                myUserModel: valueUser.data,
+              ),
+            ),
+          );
         } else {
           _btnCtrl.reset();
           if (context.mounted) {
@@ -121,7 +145,7 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
     try {
       if (_newMail.text.trim().length > 1) {
         var value = await _authRepository.changeMail(
-          baseUrl: baseUrl,
+          baseUrl: clientAppKeys.baseUrl,
           wpTokenModel: wpTokenModel,
           newEmail: _newMail.text.trim(),
         );
@@ -224,7 +248,7 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
 
               var value = await _authRepository.againVerifierCode(
                 wpTokenModel: wpTokenModel,
-                baseUrl: baseUrl,
+                baseUrl: clientAppKeys.baseUrl,
               );
               if (!value.data && context.mounted) {
                 if (value.errorMsg.toString() ==
@@ -346,6 +370,7 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
         _lang.getTextTR(langEnum: langEnum, key: "demoUserEnterMail");
     String email = _lang.getTextTR(langEnum: langEnum, key: "email");
     String next = _lang.getTextTR(langEnum: langEnum, key: "next");
+    String dUserW1 = _lang.getTextTR(langEnum: langEnum, key: "dUserW1");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +414,48 @@ Future<ResponseModel<MyUserModel?>?> verifierAccontPage({
               setState(() {
                 newMailErrorText = null;
               });
-              await _changeEmailFunc(setState);
+
+              bool? ctrlM = await _mailCFunc(mail: _newMail.text.trim());
+              if (ctrlM == true) {
+                var newWpTokenModel = await loginPage(
+                  langEnum: langEnum,
+                  context: context,
+                  clientAppKeys: clientAppKeys,
+                  infoText: "${_newMail.text.trim()} : $dUserW1",
+                  redirectEnterPassPage: true,
+                  mail: _newMail.text.trim(),
+                );
+                if (newWpTokenModel != null) {
+                  var valueUser = await _authRepository.getMyUser(
+                    wpTokenModel: newWpTokenModel,
+                    baseUrl: clientAppKeys.baseUrl,
+                  );
+
+                  Navigator.pop(
+                    context,
+                    ResponseModel(
+                      data: VerifierModel(
+                        status: true,
+                        wpTokenModel: newWpTokenModel,
+                        myUserModel: valueUser.data,
+                      ),
+                    ),
+                  );
+                } else {
+                  Navigator.pop(
+                    context,
+                    ResponseModel(
+                      data: VerifierModel(
+                        status: false,
+                        wpTokenModel: null,
+                        myUserModel: null,
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                await _changeEmailFunc(setState);
+              }
             } else {
               setState(() {
                 newMailErrorText = email;

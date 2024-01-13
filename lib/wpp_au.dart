@@ -9,6 +9,7 @@ import 'src/components/dialogs/custom_dialog.dart';
 import 'src/models/my_user_model.dart';
 import 'src/models/client_app_keys_model.dart';
 import 'src/models/response_model.dart';
+import 'src/models/verifier_model.dart';
 import 'src/models/wp_token_model.dart';
 import 'src/pages/login_page.dart';
 import 'src/pages/verifier_accont_page.dart';
@@ -55,7 +56,6 @@ class WipeppAuth {
           context: _initializeContext!,
           clientAppKeys: _clientAppKeys!,
           langEnum: _langEnum,
-          topWidget: topWidget,
         );
         return value;
       }
@@ -65,7 +65,7 @@ class WipeppAuth {
     }
   }
 
-  Future<bool> verifierAccont({
+  Future<VerifierModel?> verifierAccont({
     required WpTokenModel wpTokenModel,
     bool isDemoMail = false,
     String? userMail,
@@ -77,27 +77,25 @@ class WipeppAuth {
           error: "initialize ERROR.",
           stackTrace: StackTrace.current,
         );
-        return false;
+        return null;
       } else {
-        var value = await verifierAccontPage(
+        ResponseModel<VerifierModel?>? value = await verifierAccontPage(
           context: _initializeContext!,
           wpTokenModel: wpTokenModel,
           langEnum: _langEnum,
-          baseUrl: _clientAppKeys!.baseUrl,
           isDemoMail: isDemoMail,
           userMail: userMail,
+          clientAppKeys: _clientAppKeys!,
         );
-        if (value == null) {
-          return false;
-        } else if (value.data != null) {
-          return true;
+        if (value != null) {
+          return value.data;
         } else {
-          return false;
+          return null;
         }
       }
     } catch (e) {
       debugPrint("verifierAccont(catch) : $e");
-      return false;
+      return null;
     }
   }
 
@@ -199,10 +197,12 @@ class WipeppAuth {
             context: _initializeContext!,
             wpTokenModel: wpTokenModel,
             langEnum: _langEnum,
-            baseUrl: _clientAppKeys!.baseUrl,
+            clientAppKeys: _clientAppKeys!,
           );
           if (value2 != null) {
-            return value2;
+            return ResponseModel(
+              data: value2.data?.myUserModel,
+            );
           } else {
             return value;
           }

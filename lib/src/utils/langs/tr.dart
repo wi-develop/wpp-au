@@ -1,5 +1,6 @@
 Map<String, String> tr() {
   return {
+    "dUserW1": "Bu e-posta adresiyle zaten bir hesap mevcut.",
     "continueStr": "Devam",
     "anonimT1": "Anonim bir hesapla devam et. Adın nedir?",
     "anonimCon": "Anonim Giriş ile Devam Et",
@@ -60,6 +61,6 @@ Map<String, String> tr() {
     "year_warn":
         "Uygulamayı kullanmak ve hesap oluşturmak için 13 yaşında veya daha büyük olmalısınız.",
     "usertrue":
-        "Bu e-posta adresi ile bir hesap var. Lütfen giriş yapın. Şifrenizi hatırlamıyorsanız 'Şifremi unuttum' düğmesine tıklayın.",
+        "Bu e-posta adresiyle zaten bir hesap mevcut. Lütfen giriş yapın. Şifrenizi hatırlamıyorsanız 'Şifremi unuttum' düğmesine tıklayın.",
   };
 }

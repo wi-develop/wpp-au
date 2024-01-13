@@ -1,5 +1,6 @@
 Map<String, String> en() {
   return {
+    "dUserW1": "This email address is already associated with an account.",
     "continueStr": "Continue",
     "anonimT1": "Continue with an anonymous account. What is your name?",
     "anonimCon": "Continue with Anonymous Login",
@@ -59,6 +60,6 @@ Map<String, String> en() {
     "year_warn":
         "You must be 13 years old or older to use the application and create an account.",
     "usertrue":
-        "There is an account with this email address. Please log in. If you don't remember your password, click the 'I forgot my password' button.",
+        "This email address is already associated with an account. Please log in. If you don't remember your password, click the 'I forgot my password' button.",
   };
 }

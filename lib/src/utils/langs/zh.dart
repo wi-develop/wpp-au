@@ -1,5 +1,6 @@
 Map<String, String> zh() {
   return {
+    "dUserW1": "该电子邮件地址已与帐户关联",
     "continueStr": "继续",
     "anonimT1": "使用匿名帐户继续。你叫什么名字？",
     "anonimCon": "继续匿名登录",

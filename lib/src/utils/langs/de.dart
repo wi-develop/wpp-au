@@ -1,5 +1,6 @@
 Map<String, String> de() {
   return {
+    "dUserW1": "Diese E-Mail-Adresse ist bereits mit einem Konto verknüpft.",
     "continueStr": "Weiter",
     "anonimT1": "Mit einem anonymen Konto fortfahren. Wie ist Ihr Name?",
     "anonimCon": "Mit anonymer Anmeldung fortfahren",

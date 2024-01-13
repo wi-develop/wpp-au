@@ -1,5 +1,6 @@
 Map<String, String> pt() {
   return {
+    "dUserW1": "Este endereço de e-mail já está associado a uma conta.",
     "continueStr": "Continuar",
     "anonimT1": "Continuar com uma conta anônima. Qual é o seu nome?",
     "anonimCon": "Continuar com Login Anônimo",
