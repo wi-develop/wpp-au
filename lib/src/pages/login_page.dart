@@ -15,7 +15,7 @@ import '../utils/utils.dart';
 Future<WpTokenModel?> loginPage({
   required BuildContext context,
   required ClientAppKeys clientAppKeys,
-  LangEnum? langEnum,
+  LangEnum langEnum = LangEnum.en,
   String? infoText,
   String? mail,
   bool redirectEnterPassPage = false,
@@ -27,7 +27,7 @@ Future<WpTokenModel?> loginPage({
 
   bool isInit = false;
 
-  LangEnum _langEnum = LangEnum.en;
+  //LangEnum langEnum = LangEnum.en;
   LoginType _loginType = LoginType.enterMail;
 
   final _mail = TextEditingController();
@@ -42,7 +42,7 @@ Future<WpTokenModel?> loginPage({
   String? _yearErrorText;
 
   var _btnCtrl = LoadBtnController.idle;
-  String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
+  String forget = _lang.getTextTR(langEnum: langEnum, key: "forget");
 
   void changeLoginType(LoginType loginType, setState) {
     if (context.mounted) {
@@ -85,9 +85,9 @@ Future<WpTokenModel?> loginPage({
   }
 
   Future<WpTokenModel?> _loginFunc(setState) async {
-    String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
+    String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
     String invalidPass =
-        _lang.getTextTR(langEnum: _langEnum, key: "invalidPass");
+        _lang.getTextTR(langEnum: langEnum, key: "invalidPass");
 
     try {
       if (_mail.text.trim().length > 4 && _pass.text.trim().length > 3) {
@@ -129,8 +129,8 @@ Future<WpTokenModel?> loginPage({
   }
 
   Future<WpTokenModel?> _signupFunc(dynamic setState) async {
-    String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
-    String usertrue = _lang.getTextTR(langEnum: _langEnum, key: "usertrue");
+    String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
+    String usertrue = _lang.getTextTR(langEnum: langEnum, key: "usertrue");
 
     try {
       if (_mail.text.trim().length > 4 &&
@@ -192,8 +192,8 @@ Future<WpTokenModel?> loginPage({
   }
 
   Future<WpTokenModel?> _anonimFunc(dynamic setState) async {
-    String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
-    String usertrue = _lang.getTextTR(langEnum: _langEnum, key: "usertrue");
+    String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
+    String usertrue = _lang.getTextTR(langEnum: langEnum, key: "usertrue");
 
     try {
       if (_year != null) {
@@ -261,9 +261,9 @@ Future<WpTokenModel?> loginPage({
   }
 
   Future<void> _forgetFunc(setState) async {
-    String fill = _lang.getTextTR(langEnum: _langEnum, key: "fill");
+    String fill = _lang.getTextTR(langEnum: langEnum, key: "fill");
     String forgetSuccess =
-        _lang.getTextTR(langEnum: _langEnum, key: "forget_p_success");
+        _lang.getTextTR(langEnum: langEnum, key: "forget_p_success");
 
     try {
       if (_mail.text.trim().length > 4) {
@@ -324,15 +324,15 @@ Future<WpTokenModel?> loginPage({
   }
 
   Widget _mailEnterWidget(setState) {
-    // String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
-    String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
-    String next = _lang.getTextTR(langEnum: _langEnum, key: "next");
-    String enterMail = _lang.getTextTR(langEnum: _langEnum, key: "email");
-    String anonimCon = _lang.getTextTR(langEnum: _langEnum, key: "anonimCon");
+    // String login = _lang.getTextTR(langEnum: langEnum, key: "login");
+    String email = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String next = _lang.getTextTR(langEnum: langEnum, key: "next");
+    String enterMail = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String anonimCon = _lang.getTextTR(langEnum: langEnum, key: "anonimCon");
 
-    String wppAu1 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu1");
-    String wppAu2 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu2");
-    String wppAu3 = _lang.getTextTR(langEnum: _langEnum, key: "wppAu3");
+    String wppAu1 = _lang.getTextTR(langEnum: langEnum, key: "wppAu1");
+    String wppAu2 = _lang.getTextTR(langEnum: langEnum, key: "wppAu2");
+    String wppAu3 = _lang.getTextTR(langEnum: langEnum, key: "wppAu3");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,12 +460,12 @@ Future<WpTokenModel?> loginPage({
   }
 
   Widget _loginEnterPassWidget(setState) {
-    String login = _lang.getTextTR(langEnum: _langEnum, key: "login");
-    String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
-    String pass = _lang.getTextTR(langEnum: _langEnum, key: "pass");
-    //String showPass = _lang.getTextTR(langEnum: _langEnum, key: "showPass");
+    String login = _lang.getTextTR(langEnum: langEnum, key: "login");
+    String email = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String pass = _lang.getTextTR(langEnum: langEnum, key: "pass");
+    //String showPass = _lang.getTextTR(langEnum: langEnum, key: "showPass");
     String notEmptyText =
-        _lang.getTextTR(langEnum: _langEnum, key: "notEmptyText");
+        _lang.getTextTR(langEnum: langEnum, key: "notEmptyText");
 
     return AutofillGroup(
       child: Column(
@@ -565,15 +565,15 @@ Future<WpTokenModel?> loginPage({
   }
 
   Widget _newUserWidget(setState) {
-    String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
-    String signup = _lang.getTextTR(langEnum: _langEnum, key: "signup");
-    String new_pass = _lang.getTextTR(langEnum: _langEnum, key: "new_pass");
-    String name = _lang.getTextTR(langEnum: _langEnum, key: "name");
-    String year_data = _lang.getTextTR(langEnum: _langEnum, key: "year_data");
-    String year = _lang.getTextTR(langEnum: _langEnum, key: "year");
-    String year_warn = _lang.getTextTR(langEnum: _langEnum, key: "year_warn");
-    String min5 = _lang.getTextTR(langEnum: _langEnum, key: "min5");
-    String createWp = _lang.getTextTR(langEnum: _langEnum, key: "createWp");
+    String email = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String signup = _lang.getTextTR(langEnum: langEnum, key: "signup");
+    String new_pass = _lang.getTextTR(langEnum: langEnum, key: "new_pass");
+    String name = _lang.getTextTR(langEnum: langEnum, key: "name");
+    String year_data = _lang.getTextTR(langEnum: langEnum, key: "year_data");
+    String year = _lang.getTextTR(langEnum: langEnum, key: "year");
+    String year_warn = _lang.getTextTR(langEnum: langEnum, key: "year_warn");
+    String min5 = _lang.getTextTR(langEnum: langEnum, key: "min5");
+    String createWp = _lang.getTextTR(langEnum: langEnum, key: "createWp");
 
     return AutofillGroup(
       child: Column(
@@ -765,10 +765,10 @@ Future<WpTokenModel?> loginPage({
   }
 
   Widget _forgetWidgets(setState) {
-    String email = _lang.getTextTR(langEnum: _langEnum, key: "email");
-    String forget_b1 = _lang.getTextTR(langEnum: _langEnum, key: "forget_b1");
+    String email = _lang.getTextTR(langEnum: langEnum, key: "email");
+    String forget_b1 = _lang.getTextTR(langEnum: langEnum, key: "forget_b1");
 
-    String forget = _lang.getTextTR(langEnum: _langEnum, key: "forget");
+    String forget = _lang.getTextTR(langEnum: langEnum, key: "forget");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -801,13 +801,13 @@ Future<WpTokenModel?> loginPage({
   }
 
   Widget _anonimNewUserWidget(setState) {
-    String name = _lang.getTextTR(langEnum: _langEnum, key: "name");
-    String year_data = _lang.getTextTR(langEnum: _langEnum, key: "year_data");
-    String year = _lang.getTextTR(langEnum: _langEnum, key: "year");
-    String year_warn = _lang.getTextTR(langEnum: _langEnum, key: "year_warn");
-    String anonimT1 = _lang.getTextTR(langEnum: _langEnum, key: "anonimT1");
+    String name = _lang.getTextTR(langEnum: langEnum, key: "name");
+    String year_data = _lang.getTextTR(langEnum: langEnum, key: "year_data");
+    String year = _lang.getTextTR(langEnum: langEnum, key: "year");
+    String year_warn = _lang.getTextTR(langEnum: langEnum, key: "year_warn");
+    String anonimT1 = _lang.getTextTR(langEnum: langEnum, key: "anonimT1");
     String continueStr =
-        _lang.getTextTR(langEnum: _langEnum, key: "continueStr");
+        _lang.getTextTR(langEnum: langEnum, key: "continueStr");
 
     return AutofillGroup(
       child: Column(
