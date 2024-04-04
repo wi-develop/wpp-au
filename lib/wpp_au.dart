@@ -186,18 +186,49 @@ class WipeppAuth {
       );
 
       if (value.data == null && _initializeContext != null) {
-        if (value.errorMsg.toString() ==
-            '{"statusCode":401,"msg":"U_P_0","errorMessage":"","key":null}') {
+        String errorKey = "";
+        String? userMail;
+
+        try {
+          var arr1 = value.errorMsg
+              .toString()
+              .replaceAll('"', "")
+              .replaceAll('{', "")
+              .replaceAll('}', "")
+              .split(",");
+
+          for (var i = 0; i < arr1.length; i++) {
+            var element = arr1[i].trim();
+            var arr2 = element.split(":");
+
+            if (arr2.length == 2 && arr2[0] == "key") {
+              errorKey = arr2[1].trim();
+            }
+
+            if (arr2.length == 2 && arr2[0] == "errorMessage") {
+              String yy1 = arr2[1].trim();
+              var arrMail = yy1.split("@");
+              if (arrMail.length == 2) {
+                userMail = yy1.trim();
+              }
+            }
+          }
+        } catch (e) {
+          //
+        }
+
+        if (errorKey == "U_P_0") {
           //* change password.
           return _loginAndReturnUser();
-        } else if (value.errorMsg.toString() ==
-            '{"statusCode":401,"msg":"U_0","errorMessage":"","key":"U_0"}') {
+        } else if (errorKey == "U_0" || errorKey == "U_0_demo") {
           //* confirm accont
           var value2 = await verifierAccontPage(
             context: _initializeContext!,
             wpTokenModel: wpTokenModel,
             langEnum: _langEnum,
             clientAppKeys: _clientAppKeys!,
+            isDemoMail: errorKey == "U_0_demo" ? true : false,
+            userMail: errorKey == "U_0_demo" ? null : userMail,
           );
           if (value2 != null) {
             return ResponseModel(
@@ -206,8 +237,7 @@ class WipeppAuth {
           } else {
             return value;
           }
-        } else if (value.errorMsg.toString() ==
-            '{"statusCode":400,"msg":"jwt expired","errorMessage":"","key":null}') {
+        } else if (errorKey == "null") {
           var valueUser2 = await authRepository.getMyUser(
             wpTokenModel: wpTokenModel,
             baseUrl: _clientAppKeys!.baseUrl,
