@@ -216,7 +216,6 @@ class WipeppAuth {
         } catch (e) {
           //
         }
-
         if (errorKey == "U_P_0") {
           //* change password.
           return _loginAndReturnUser();
@@ -226,6 +225,7 @@ class WipeppAuth {
             context: _initializeContext!,
             wpTokenModel: wpTokenModel,
             langEnum: _langEnum,
+            showCloseIcon: false,
             clientAppKeys: _clientAppKeys!,
             isDemoMail: errorKey == "U_0_demo" ? true : false,
             userMail: errorKey == "U_0_demo" ? null : userMail,
@@ -235,7 +235,14 @@ class WipeppAuth {
               data: value2.data?.myUserModel,
             );
           } else {
-            return value;
+            return ResponseModel(
+              data: value.data,
+              verifierRequiredModel: VerifierRequiredModel(
+                errorKey: errorKey,
+                isDemoMail: errorKey == "U_0_demo" ? true : false,
+                email: errorKey == "U_0_demo" ? null : userMail,
+              ),
+            );
           }
         } else if (errorKey == "null") {
           var valueUser2 = await authRepository.getMyUser(
@@ -261,8 +268,14 @@ class WipeppAuth {
         return value;
       }
     } catch (e) {
+      log(
+        "getMyUser ERROR(catch) : $e",
+        error: "getMyUser ERROR(catch) : $e",
+        stackTrace: StackTrace.current,
+      );
       return ResponseModel(
         data: null,
+        errorMsg: "$e",
       );
     }
   }

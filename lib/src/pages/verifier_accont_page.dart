@@ -22,6 +22,7 @@ Future<ResponseModel<VerifierModel?>?> verifierAccontPage({
   required ClientAppKeys clientAppKeys,
   bool isDemoMail = false,
   String? userMail,
+  bool showCloseIcon = true,
 }) async {
   final _utils = Utils();
   final _lang = Lang();
@@ -498,41 +499,44 @@ Future<ResponseModel<VerifierModel?>?> verifierAccontPage({
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: size.width,
-                        padding: EdgeInsets.all(20),
-                        color: _utils.appColor.scaffoldBg,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.close,
-                              size: 26,
-                              color: _utils.appColor.titleColor,
-                            ),
-                            SizedBox(width: 8.0),
-                            Flexible(
-                              child: Text(
-                                (_pageType == _PageType.verifier)
-                                    ? verify_acc.toUpperCase()
-                                    : (_pageType == _PageType.changeMail)
-                                        ? change_email_B1.toUpperCase()
-                                        : "",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 19.0,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 1.0,
+                    if (showCloseIcon)
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: size.width,
+                          padding: EdgeInsets.all(20),
+                          color: _utils.appColor.scaffoldBg,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.close,
+                                size: 26,
+                                color: _utils.appColor.titleColor,
+                              ),
+                              SizedBox(width: 8.0),
+                              Flexible(
+                                child: Text(
+                                  (_pageType == _PageType.verifier)
+                                      ? verify_acc.toUpperCase()
+                                      : (_pageType == _PageType.changeMail)
+                                          ? change_email_B1.toUpperCase()
+                                          : "",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 19.0,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
+                      )
+                    else
+                      SizedBox(),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(

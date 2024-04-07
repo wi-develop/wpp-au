@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 import '../models/api_model.dart';
 import '../models/client_app_keys_model.dart';
 import '../models/my_user_model.dart';
@@ -304,6 +306,7 @@ class AuthRepository {
         return ResponseModel(
           data: MyUserModel.fromJson(res.jsonBody!),
           wpTokenModel: newWpTokenModel,
+          errorMsg: res.errorDetail,
         );
       } else {
         return ResponseModel(
