@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:d_id/d_id.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:platform_device_id/platform_device_id.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import '../models/app_color_model.dart';
 import './custom_launch_url.dart';
@@ -53,7 +53,7 @@ class Utils {
 
   Future<String> _getDeviceId() async {
     try {
-      String? deviceId = await PlatformDeviceId.getDeviceId;
+      String? deviceId = await Did().getDeviceId();
       return deviceId.toString();
     } catch (e) {
       return "null";

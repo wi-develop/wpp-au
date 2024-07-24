@@ -1,12 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:flutter/material.dart';
-import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:wpp_au/src/pages/login_page.dart';
-
 import '../../wpp_au.dart';
 import '../components/dialogs/custom_dialog.dart';
 import '../components/forms/custom_button.dart';
+import '../components/forms/custom_rounded_button.dart';
 import '../components/forms/text_form_field.dart';
 import '../models/verifier_model.dart';
 import '../repository/auth_repository.dart';
@@ -56,7 +55,7 @@ Future<ResponseModel<VerifierModel?>?> verifierAccontPage({
 
   final _newMail = TextEditingController();
   final _code = TextEditingController();
-  final _btnCtrl = RoundedLoadingButtonController();
+  final _btnCtrl = CustomRoundedButtonController();
 
   String? newMailErrorText;
 

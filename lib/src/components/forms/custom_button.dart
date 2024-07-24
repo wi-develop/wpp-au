@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:rounded_loading_button/rounded_loading_button.dart';
-
 import '../../utils/utils.dart';
+import 'custom_rounded_button.dart';
 
 // ignore: must_be_immutable
 class CustomButton extends StatelessWidget {
-  RoundedLoadingButtonController? controller;
+  CustomRoundedButtonController? controller;
   String text;
   VoidCallback onPressed;
   double borderRadius;
@@ -42,7 +41,7 @@ class CustomButton extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     if (controller != null) {
-      return RoundedLoadingButton(
+      return CustomRoundedButton(
         controller: controller!,
         borderRadius: borderRadius,
         color: Theme.of(context).scaffoldBackgroundColor,
